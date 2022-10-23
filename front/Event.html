@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <button id="btn">클릭</button>
+        <p id="text"></p>
+        <script>
+            const showBtn = document.getElementById("btn"); // 아이디가 "btn"인 요소를 선택함.
+
+            showBtn.addEventListener("click", function (event) {
+                console.log(event);
+                document.getElementById("text").innerHTML =
+                    "이 이벤트의 타입은 " + event.type + "입니다."; // 이 이벤트의 타입은 click입니다.
+            });
+        </script>
+    </body>
+</html>

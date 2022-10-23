@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+
+        <title>Document</title>
+    </head>
+    <body>
+        <div id="container">
+            <div class="inner"></div>
+        </div>
+        <script>
+            // div.inner를 선택
+            let inner = document.querySelector(".inner");
+            // <div>태그 생성
+            let element = document.createElement("div");
+            // text 노드 hello 생성
+            let hello = document.createTextNode("hello");
+            // <div>hello</div>로 만들기
+            element.appendChild(hello);
+            // div.inner에 element 추가
+            inner.appendChild(element);
+        </script>
+    </body>
+</html>
