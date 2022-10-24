@@ -14,9 +14,11 @@ module.exports = function (app) {
     app.get("/restaurants", index.readRestaurants);
     app.get("/student/:studentId", index.readStudent);
     app.get("/restaurant/:restaurantId", index.readRestaurant);
+    app.get("/user/:userId", index.readUser);
     app.get("/restaurantsByCategory", index.readRestaurantByCategory);
     app.get("/restaurantsByCategory/:category", index.readRestaurantByCategory);
     app.post("/student", index.createStudent);
+    app.post("/user", index.createUser);
     app.post("/restaurant", index.createRestaurant);
     app.patch("/student/:studentId", index.editStudent);
     app.patch("/restaurant/:restaurantId", index.editRestaurant);

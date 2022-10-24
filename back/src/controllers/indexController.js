@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const secret = require("../../config/secret");
 
 const indexDao = require("../dao/indexDao");
+const { jwtsecret } = require("../../config/secret");
 
 // 학생들 테이블 조회
 exports.readStudents = async function (req, res) {
@@ -120,6 +121,31 @@ exports.readRestaurant = async function (req, res) {
     }
 };
 
+exports.readUser = async function (req, res) {
+    const { userId } = req.params;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        try {
+            const [rows] = await indexDao.selectUser(connection, userId);
+
+            return res.send({
+                result: rows,
+                isSuccess: true,
+                code: 200, // 요청 실패시 400번대 코드
+                message: "요청 성공",
+            });
+        } catch (err) {
+            logger.error(`readUser Query error\n: ${JSON.stringify(err)}`);
+            return false;
+        } finally {
+            connection.release();
+        }
+    } catch (err) {
+        logger.error(`readUser DB Connection error\n: ${JSON.stringify(err)}`);
+        return false;
+    }
+};
+
 exports.readRestaurantByCategory = async function (req, res) {
     // [참고] ...?category=한식 이런식으로 넘어오면 req.query 로 값을 받는다.
     // ex) const { category } = req.query;
@@ -229,6 +255,77 @@ exports.createStudent = async function (req, res) {
             `createStudent DB Connection error\n: ${JSON.stringify(err)}`
         );
         return false;
+    }
+};
+
+exports.createUser = async function (req, res) {
+    const { userId, password, nickname } = req.body;
+
+    const userIdRegExp = /^[a-z]+[a-z0-9]{5,19}$/; // 영문시작 + 영문 혹은 숫자 5~19자
+    const passwordRegExp = /^(?=.*\d)(?=.*[a-zA-Z])[0-9a-zA-Z]{8,16}$/; // 8~16 문자, 숫자 조합
+    const nicknameRegExp = /^[가-힣|a-z|A-Z|0-9|]{2,10}$/; // 2~10 한글, 숫자, 또는 영문
+
+    if (!userIdRegExp.test(userId)) {
+        return res.send({
+            isSuccess: false,
+            code: 400,
+            message:
+                "아이디는 영문자로 시작하는 영문자 또는 숫자 6~20자여야 합니다.",
+        });
+    }
+    if (!passwordRegExp.test(password)) {
+        return res.send({
+            isSuccess: false,
+            code: 400,
+            message: "패스워드는 8~16 문자, 숫자 조합 입니다.",
+        });
+    }
+    if (!nicknameRegExp.test(nickname)) {
+        return res.send({
+            isSuccess: false,
+            code: 400,
+            message: "닉네임은 2~10 한글, 숫자, 또는 영문 이어야 합니다.",
+        });
+    }
+
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        // 아이디 중복검사
+        const user = await indexDao.selectUser(connection, userId);
+        if (user && user.result && user.result.length) {
+            return res.send({
+                isSuccess: false,
+                code: 400,
+                message: "존재하는 아이디 입니다.",
+            });
+        }
+
+        // DB 입력
+        const [rows] = await indexDao.insertUser(
+            connection,
+            nickname,
+            userId,
+            password
+        );
+
+        // 입력된 유저 인덱스
+        const userIdx = rows.insertId; // 실제 DB에 자동증가로 입력되는 값
+
+        // jwt 발급
+        const token = jwt.sign(
+            { userIdx: userIdx, nickname: nickname },
+            secret.jwtsecret
+        );
+
+        return res.send({
+            result: token,
+            isSuccess: true,
+            code: 200, // 요청 실패시 400번대 코드
+            message: "요청 성공",
+        });
+    } catch (err) {
+        console.error(err);
     }
 };
 

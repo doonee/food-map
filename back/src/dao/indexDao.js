@@ -27,6 +27,16 @@ exports.selectStudent = async function (connection, studentId) {
     return rows;
 };
 
+exports.selectUser = async function (connection, userId) {
+    let Query, Params;
+    Query = `SELECT * FROM testdb2.Users WHERE userId = ?;`;
+    Params = userId;
+
+    const rows = await connection.query(Query, Params);
+
+    return rows;
+};
+
 exports.selectRestaurant = async function (connection, restaurantId) {
     const Query = `SELECT * FROM testdb2.Restaurants WHERE id = ?;`;
     const Params = [restaurantId];
@@ -75,6 +85,15 @@ exports.insertRestaurant = async function (
 ) {
     const Query = `INSERT INTO Restaurants (title, address, videoUrl, category) VALUES (?, ?, ?, ?);`;
     const Params = [title, address, videoUrl, category];
+
+    const rows = await connection.query(Query, Params);
+
+    return rows;
+};
+
+exports.insertUser = async function (connection, nickname, userId, password) {
+    const Query = `INSERT INTO Users (nickname, userId, password) VALUES (?, ?, ?);`;
+    const Params = [nickname, userId, password];
 
     const rows = await connection.query(Query, Params);
 
