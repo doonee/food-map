@@ -37,6 +37,16 @@ exports.selectUser = async function (connection, userId) {
     return rows;
 };
 
+exports.isValidUser = async function (connection, userId, password) {
+    let Query, Params;
+    Query = `SELECT * FROM testdb2.Users WHERE userId = ? and password = ? and status = 'A';`;
+    Params = [userId, password];
+
+    const rows = await connection.query(Query, Params);
+
+    return rows;
+};
+
 exports.selectRestaurant = async function (connection, restaurantId) {
     const Query = `SELECT * FROM testdb2.Restaurants WHERE id = ?;`;
     const Params = [restaurantId];

@@ -6,6 +6,17 @@ const secret = require("../../config/secret");
 const indexDao = require("../dao/indexDao");
 const { jwtsecret } = require("../../config/secret");
 
+exports.readJwt = async function (req, res) {
+    console.log("req => ", req);
+    const { userIdx, nickname } = req.verifiedToken;
+
+    return res.send({
+        result: { userIdx: userIdx, nickname: nickname },
+        code: 200,
+        message: "유효한 토큰입니다.",
+    });
+};
+
 // 학생들 테이블 조회
 exports.readStudents = async function (req, res) {
     try {
@@ -292,8 +303,10 @@ exports.createUser = async function (req, res) {
         const connection = await pool.getConnection(async (conn) => conn);
 
         // 아이디 중복검사
-        const user = await indexDao.selectUser(connection, userId);
-        if (user && user.result && user.result.length) {
+        const [user] = await indexDao.selectUser(connection, userId);
+        console.log("user => ", user);
+
+        if (user.length) {
             return res.send({
                 isSuccess: false,
                 code: 400,
@@ -319,10 +332,54 @@ exports.createUser = async function (req, res) {
         );
 
         return res.send({
-            result: token,
+            result: { jwt: token },
             isSuccess: true,
             code: 200, // 요청 실패시 400번대 코드
-            message: "요청 성공",
+            message: "회원가입 성공",
+        });
+    } catch (err) {
+        console.error(err);
+    }
+};
+
+exports.createJwt = async function (req, res) {
+    const { userId, password } = req.body;
+
+    if (!userId || !password) {
+        return res.send({
+            isSuccess: false,
+            code: 400,
+            message: "회원정보를 모두 입력해주세요.",
+        });
+    }
+
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        // 아이디와 비밀번호로 회원검증
+        const [user] = await indexDao.isValidUser(connection, userId, password);
+        if (!user.length) {
+            return res.send({
+                isSuccess: false,
+                code: 410,
+                message: "존재하지 않는 회원 입니다.",
+            });
+        }
+
+        // 실제 서비스 에서는 userIdx는 일련번호이기 때문에 숨겨야함!
+        const { userIdx, nickname } = user[0];
+
+        // jwt 발급
+        const token = jwt.sign(
+            { userIdx: userIdx, nickname: nickname },
+            secret.jwtsecret
+        );
+
+        return res.send({
+            result: { jwt: token },
+            isSuccess: true,
+            code: 200, // 요청 실패시 400번대 코드
+            message: "로그인 성공",
         });
     } catch (err) {
         console.error(err);
