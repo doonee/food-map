@@ -17,10 +17,6 @@ html {
     font-family: "KyoboHandwriting2020A";
 }
 
-nav {
-    /* background-color: #e69a06; */
-}
-
 .nav-container {
     padding: 1rem 0;
     display: flex;
