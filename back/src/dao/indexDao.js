@@ -18,6 +18,15 @@ exports.selectRestaurants = async function (connection, params) {
     return rows;
 };
 
+exports.selectUsers = async function (connection, params) {
+    const Query = `SELECT * FROM testdb2.Users;`;
+    const Params = [];
+
+    const rows = await connection.query(Query, Params);
+
+    return rows;
+};
+
 exports.selectStudent = async function (connection, studentId) {
     const Query = `SELECT * FROM testdb2.Students WHERE id = ?;`;
     const Params = [studentId];

@@ -72,6 +72,30 @@ exports.readRestaurants = async function (req, res) {
     }
 };
 
+exports.readUsers = async function (req, res) {
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        try {
+            const [rows] = await indexDao.selectUsers(connection);
+
+            return res.send({
+                result: rows,
+                isSuccess: true,
+                code: 200,
+                message: "요청 성공",
+            });
+        } catch (err) {
+            logger.error(`readUsers Query error\n: ${JSON.stringify(err)}`);
+            return false;
+        } finally {
+            connection.release();
+        }
+    } catch (err) {
+        logger.error(`readUsers DB Connection error\n: ${JSON.stringify(err)}`);
+        return false;
+    }
+};
+
 // 특정 학생 테이블 조회
 exports.readStudent = async function (req, res) {
     const { studentId } = req.params;

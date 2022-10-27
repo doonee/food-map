@@ -12,6 +12,7 @@ module.exports = function (app) {
 
     app.get("/students", index.readStudents);
     app.get("/restaurants", index.readRestaurants);
+    app.get("/users", index.readUsers);
     app.get("/student/:studentId", index.readStudent);
     app.get("/restaurant/:restaurantId", index.readRestaurant);
     app.get("/user/:userId", index.readUser);
